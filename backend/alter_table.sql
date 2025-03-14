@@ -1,0 +1,1 @@
+ALTER TABLE projects ADD COLUMN repository_type VARCHAR DEFAULT 'git' NOT NULL; 

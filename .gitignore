@@ -1,0 +1,76 @@
+# 虚拟环境
+.venv/
+backend/.venv/
+venv/
+ENV/
+env/
+
+# Python编译文件
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# 临时文件
+*.log
+*.bak
+*.swp
+*~.nib
+*.tmp
+
+# 开发IDE/编辑器配置
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# 缓存
+.cache/
+.pytest_cache/
+.coverage
+
+# 数据库
+*.sqlite3
+*.db
+
+# 前端构建产物
+node_modules/
+frontend/node_modules/
+frontend/build/
+frontend/dist/
+frontend/.env
+
+# 不要忽略的重要文件 (这些只是提示，实际会在代码中处理)
+# !start_all.bat
+# !README.md
+# !prompt.txt
+# !.gitignore
+
+# 后端相关忽略
+backend/.pytest_cache/
+backend/.coverage
+backend/venv/
+backend/env/
+backend/*.log
+backend/.env
+backend/.env.*
+backend/project_center.db-journal
+backend/projects
+
+# 通用忽略
+.DS_Store
+*.swp
+*~
+*.bak
+*.backup
+*.log
+logs/
+tmp/
+temp/
+.git/
+
+# 项目特定文件忽略
+*.db-journal
+*.sqlite-journal
+*.pyc 

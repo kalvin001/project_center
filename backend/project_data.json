@@ -1,0 +1,14 @@
+{
+  "id": 11,
+  "name": "Demo222",
+  "description": null,
+  "owner_id": 1,
+  "repository_url": "D:\\data\\code\\eai_demo",
+  "repository_type": "git",
+  "last_updated": "2025-03-14 10:38:28",
+  "created_at": "2025-03-14 10:38:28",
+  "is_active": 1,
+  "project_type": "fullstack",
+  "tech_stack": "null",
+  "storage_path": "D:\\code\\projects\\project_center\\backend\\projects\\e1648cee-4b6d-4035-984c-076ddbd0fd99"
+}

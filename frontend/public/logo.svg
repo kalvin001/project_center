@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g transform="translate(20, 20) scale(0.8)">
+    <!-- 背景圆形 -->
+    <circle cx="100" cy="100" r="90" fill="#ffffff" stroke="#1890ff" stroke-width="4"/>
+    
+    <!-- 项目文件夹图标 -->
+    <g transform="translate(35, 50) scale(0.9)">
+      <!-- 文件夹1 -->
+      <path d="M30 20H90C93.866 20 97 23.134 97 27V77C97 80.866 93.866 84 90 84H30C26.134 84 23 80.866 23 77V27C23 23.134 26.134 20 30 20Z" fill="#1890ff" opacity="0.9"/>
+      <!-- 文件夹2 -->
+      <path d="M50 35H110C113.866 35 117 38.134 117 42V92C117 95.866 113.866 99 110 99H50C46.134 99 43 95.866 43 92V42C43 38.134 46.134 35 50 35Z" fill="#52c41a" opacity="0.9"/>
+      <!-- 文件夹3 -->
+      <path d="M70 50H130C133.866 50 137 53.134 137 57V107C137 110.866 133.866 114 130 114H70C66.134 114 63 110.866 63 107V57C63 53.134 66.134 50 70 50Z" fill="#722ed1" opacity="0.9"/>
+      
+      <!-- 图表图标 -->
+      <rect x="85" y="65" width="30" height="34" rx="2" fill="white"/>
+      <line x1="90" y1="75" x2="110" y2="75" stroke="#333" stroke-width="2"/>
+      <line x1="90" y1="83" x2="105" y2="83" stroke="#333" stroke-width="2"/>
+      <line x1="90" y1="91" x2="108" y2="91" stroke="#333" stroke-width="2"/>
+    </g>
+    
+    <!-- 圆形边框装饰 -->
+    <path d="M100 10C48.5 10 10 48.5 10 100C10 151.5 48.5 190 100 190" stroke="#1890ff" stroke-width="4" stroke-linecap="round" stroke-dasharray="8 8"/>
+    <path d="M100 10C151.5 10 190 48.5 190 100C190 151.5 151.5 190 100 190" stroke="#52c41a" stroke-width="4" stroke-linecap="round" stroke-dasharray="8 8"/>
+  </g>
+</svg> 
