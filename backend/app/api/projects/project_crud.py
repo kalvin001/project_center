@@ -10,11 +10,13 @@ import uuid
 import logging
 import time
 import subprocess
+import traceback
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import and_, func
 from typing import List
+from datetime import datetime
 
 from app.core.config import settings
 from app.db.database import get_db
@@ -24,6 +26,7 @@ from app.schemas.project import ProjectCreate, ProjectUpdate, ProjectResponse, P
 from app.api.deps import get_current_active_user
 from app.utils.file_utils import format_size
 from app.api.projects.repository_sync import sync_git_repository, sync_local_folder
+from app.models.machine import Machine
 
 router = APIRouter()
 
@@ -227,54 +230,107 @@ async def read_project(
     current_user: User = Depends(get_current_active_user),
 ):
     """获取项目详情"""
-    # 获取项目
-    if current_user.is_admin:
-        result = await db.execute(
-            select(Project).where(Project.id == project_id)
-        )
-    else:
-        result = await db.execute(
-            select(Project).where(
-                and_(Project.id == project_id, Project.owner_id == current_user.id)
+    try:
+        # 获取项目
+        if current_user.is_admin:
+            result = await db.execute(
+                select(Project).where(Project.id == project_id)
             )
+        else:
+            result = await db.execute(
+                select(Project).where(
+                    and_(Project.id == project_id, Project.owner_id == current_user.id)
+                )
+            )
+        
+        project = result.scalars().first()
+        
+        if not project:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="项目不存在或没有访问权限",
+            )
+        
+        # 获取项目部署记录
+        deployment_result = await db.execute(
+            select(Deployment).where(Deployment.project_id == project_id)
         )
-    
-    project = result.scalars().first()
-    
-    if not project:
+        db_deployments = deployment_result.scalars().all()
+        
+        # 转换部署记录为响应模型
+        deployments = []
+        for dep in db_deployments:
+            try:
+                # 获取机器信息以获取server_host
+                machine_result = await db.execute(
+                    select(Machine).where(Machine.id == dep.machine_id)
+                )
+                machine = machine_result.scalars().first()
+                
+                # 检查机器是
+                if machine:
+                    server_host = machine.hostname
+                    server_port = machine.ssh_port
+                else:
+                    logging.warning(f"部署ID {dep.id} 引用的机器ID {dep.machine_id} 不存在")
+                    server_host = "unknown"
+                    server_port = None
+                
+                # 创建部署响应对象
+                deployment_data = {
+                    "id": dep.id,
+                    "project_id": dep.project_id,
+                    "environment": dep.environment,
+                    "server_host": server_host,
+                    "server_port": server_port,
+                    "deploy_path": dep.deploy_path or "",
+                    "status": dep.status,
+                    "log": dep.log,
+                    "deployed_at": dep.deployed_at or datetime.now(),
+                    "created_at": dep.created_at
+                }
+                deployments.append(deployment_data)
+            except Exception as e:
+                logging.error(f"处理部署ID {dep.id} 时出错: {e}")
+                # 继续处理其他部署记录，不中断流程
+        
+        # 获取项目统计信息
+        stats = {"file_count": 0, "total_size_bytes": 0, "code_lines": 0, "total_size_human": "0 B", "ignore_file_exists": False}
+        try:
+            if os.path.exists(project.storage_path) and os.path.isdir(project.storage_path):
+                stats = await count_project_stats(project.storage_path)
+            else:
+                logging.warning(f"项目存储路径不存在或不是目录: {project.storage_path}")
+        except Exception as e:
+            logging.error(f"计算项目统计信息时出错: {e}")
+            logging.error(traceback.format_exc())
+        
+        # 创建响应数据
+        project_data = {
+            "id": project.id,
+            "name": project.name,
+            "description": project.description,
+            "owner_id": project.owner_id,
+            "repository_url": project.repository_url,
+            "repository_type": project.repository_type,
+            "is_active": project.is_active,
+            "project_type": project.project_type,
+            "tech_stack": project.tech_stack,
+            "storage_path": project.storage_path,
+            "created_at": project.created_at,
+            "last_updated": project.last_updated,
+            "deployments": deployments,
+            "stats": stats  # 添加统计信息
+        }
+        
+        return ProjectWithDeployments(**project_data)
+    except Exception as e:
+        logging.error(f"获取项目详情时出错 (项目ID: {project_id}): {e}")
+        logging.error(traceback.format_exc())
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="项目不存在或没有访问权限",
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"获取项目详情时出错: {str(e)}",
         )
-    
-    # 获取项目部署记录
-    deployment_result = await db.execute(
-        select(Deployment).where(Deployment.project_id == project_id)
-    )
-    deployments = deployment_result.scalars().all()
-    
-    # 获取项目统计信息
-    stats = await count_project_stats(project.storage_path)
-    
-    # 创建响应数据
-    project_data = {
-        "id": project.id,
-        "name": project.name,
-        "description": project.description,
-        "owner_id": project.owner_id,
-        "repository_url": project.repository_url,
-        "repository_type": project.repository_type,
-        "is_active": project.is_active,
-        "project_type": project.project_type,
-        "tech_stack": project.tech_stack,
-        "storage_path": project.storage_path,
-        "created_at": project.created_at,
-        "last_updated": project.last_updated,
-        "deployments": deployments,
-        "stats": stats  # 添加统计信息
-    }
-    
-    return ProjectWithDeployments(**project_data)
 
 
 @router.put("/{project_id}", response_model=ProjectResponse)

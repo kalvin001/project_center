@@ -11,9 +11,10 @@ export default defineConfig({
     },
   },
   server: {
+    strictPort: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:8011',
+        target: 'http://127.0.0.1:8011',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path,
@@ -29,6 +30,11 @@ export default defineConfig({
           });
         },
       },
+      '/static': {
+        target: 'http://127.0.0.1:8011',
+        changeOrigin: true,
+        secure: false
+      }
     },
   },
 }) 

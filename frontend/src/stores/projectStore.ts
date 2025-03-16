@@ -33,9 +33,8 @@ interface Project {
 interface Deployment {
   id: number
   project_id: number
+  machine_id: number
   environment: string
-  server_host: string
-  server_port: number | null
   deploy_path: string
   status: string
   log: string | null
@@ -128,10 +127,17 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
     try {
       const token = localStorage.getItem('token')
       console.log(`正在获取项目${id}的详情...`)
-      const response = await axios.get(`${API_URL}/projects/${id}`, {
+      
+      // 添加时间戳参数，确保不使用缓存
+      const timestamp = new Date().getTime()
+      const response = await axios.get(`${API_URL}/projects/${id}?_t=${timestamp}`, {
         headers: {
           Authorization: `Bearer ${token}`,
-        },
+          // 禁用浏览器缓存的HTTP头
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
       })
       console.log(`项目${id}详情API响应:`, response.data)
       
@@ -318,7 +324,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
     set({ loading: true, error: null })
     try {
       const token = localStorage.getItem('token')
-      await axios.post(`${API_URL}/projects/${projectId}/deployments`, {
+      await axios.post(`${API_URL}/deployments`, {
         ...deployment,
         project_id: projectId,
       }, {
@@ -450,12 +456,15 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
     })
     
     try {
+      let wsConnected = false;
+      
       // 创建WebSocket连接
       const ws = new WebSocket(`ws://localhost:8011/api/projects/ws/${id}/sync-progress`);
       
       // 设置WebSocket事件处理程序
       ws.onopen = () => {
         console.log('WebSocket连接已建立，开始同步项目');
+        wsConnected = true;
       };
       
       ws.onmessage = (event) => {
@@ -489,20 +498,17 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       
       ws.onerror = (error) => {
         console.error('WebSocket错误:', error);
-        set({ 
-          loading: false,
-          error: '同步连接出错',
-          syncProgress: {
-            status: 'error',
-            message: '同步连接出错',
-            progress: 0
-          }
-        });
+        wsConnected = false;
+        // 不立即设置错误状态，等待HTTP请求完成后再判断
       };
       
       ws.onclose = () => {
         console.log('WebSocket连接已关闭');
+        wsConnected = false;
       };
+      
+      // 等待WebSocket连接尝试完成
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       // 发起同步请求
       const token = localStorage.getItem('token')
@@ -514,6 +520,20 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       
       // 同步成功后自动刷新项目详情
       await get().fetchProject(id);
+      
+      // 如果WebSocket连接失败但HTTP请求成功，不显示错误
+      if (!wsConnected) {
+        console.log('WebSocket连接失败，但同步请求已成功完成');
+        set({ 
+          loading: false,
+          syncProgress: {
+            status: 'complete',
+            message: '项目同步成功',
+            progress: 100
+          }
+        });
+        message.success('项目同步成功');
+      }
       
       return response.data;
     } catch (error: any) {

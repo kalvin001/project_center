@@ -1,9 +1,11 @@
 import logging
 from fastapi import FastAPI, APIRouter, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
+import os
 
-from app.api import auth, projects, files
+from app.api import auth, projects, files, machines, logs, deployments
 from app.core.config import settings
 from app.db.database import init_db, async_session_factory
 from app.core.auth import add_test_user
@@ -64,9 +66,17 @@ api_router = APIRouter(prefix=settings.API_PREFIX)
 api_router.include_router(auth.router, prefix="/auth", tags=["认证"])
 api_router.include_router(projects.router, prefix="/projects", tags=["项目"])
 api_router.include_router(files.router, prefix="/files", tags=["文件系统"])
+api_router.include_router(machines.router, prefix="/machines", tags=["机器管理"])
+api_router.include_router(logs.router, prefix="/logs", tags=["日志管理"])
+api_router.include_router(deployments.router, prefix="/deployments", tags=["部署管理"])
 
 # 将主路由添加到应用
 app.include_router(api_router)
+
+# 配置静态文件服务
+static_dir = os.path.join(os.getcwd(), "static")
+os.makedirs(static_dir, exist_ok=True)  # 确保目录存在
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 
 @app.get("/")

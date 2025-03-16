@@ -20,6 +20,7 @@ class UserUpdate(BaseModel):
     username: Optional[str] = None
     email: Optional[EmailStr] = None
     password: Optional[str] = None
+    avatar_url: Optional[str] = None
     is_active: Optional[bool] = None
     is_admin: Optional[bool] = None
 
@@ -35,9 +36,19 @@ class UserInDB(UserBase):
         from_attributes = True
 
 
-class UserResponse(UserInDB):
+class UserResponse(BaseModel):
     """返回给客户端的用户数据"""
-    pass
+    id: int
+    username: str
+    email: EmailStr
+    is_active: bool
+    is_admin: bool
+    avatar_url: Optional[str] = None
+    created_at: datetime = None
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        orm_mode = True
 
 
 class Token(BaseModel):

@@ -70,7 +70,7 @@ const Layout: React.FC = () => {
         </div>
       </Header>
       <AntLayout>
-        {!isProfilePage && (
+        {/* {!isProfilePage && (
           <Sider width={200} style={{ background: token.colorBgContainer }}>
             <Menu
               mode="inline"
@@ -93,20 +93,21 @@ const Layout: React.FC = () => {
                   key: 'create-project',
                   icon: <PlusOutlined />,
                   label: '创建项目',
-                  onClick: () => navigate('/projects/create'),
+                  onClick: () => navigate('/create-project'),
                 },
               ]}
             />
           </Sider>
-        )}
-        <AntLayout style={{ padding: '0 24px 24px' }}>
+        )} */}
+        <AntLayout style={{ padding: '0' }}>
           <Content
             className="site-layout-content"
             style={{
-              padding: 24,
-              margin: '16px 0',
+              padding: isProfilePage ? 0 : 24,
+              margin: isProfilePage ? 0 : '16px 0',
               minHeight: 280,
-              background: token.colorBgContainer,
+              background: isProfilePage ? 'transparent' : token.colorBgContainer,
+              maxWidth: '100%'
             }}
           >
             <Outlet />

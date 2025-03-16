@@ -20,10 +20,16 @@ dependencies = [
     "passlib[bcrypt]>=1.7.4",
     "email-validator>=2.0.0",
     "tomli>=2.0.0",
+    "psutil",
+    "pathspec",
+    "paramiko",
+    "pyyaml",
+    "aiofiles",
+    "python-magic-bin;platform_system=='Windows'",
+    "python-magic;platform_system!='Windows'"
 ]
 
 [tool.hatch.build.targets.wheel]
 packages = ["app"]
 
-[tool.uv]
-exclude = [] 
+# 移除了不兼容的工具配置 

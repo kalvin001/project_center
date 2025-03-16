@@ -166,7 +166,7 @@ const ProjectList: React.FC = () => {
           <Button 
             type="primary" 
             icon={<PlusOutlined />}
-            onClick={() => navigate('/projects/create')}
+            onClick={() => navigate('/create-project')}
           >
             创建项目
           </Button>

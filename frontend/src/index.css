@@ -30,8 +30,8 @@ body {
 }
 
 .site-layout-content {
-  padding: 24px;
   min-height: 280px;
+  width: 100%;
 }
 
 .logo {
@@ -82,9 +82,9 @@ body {
   float: right;
 }
 
-/* 个人资料页面样式 */
+/* 个人资料页面样式 居中展示*/
 .profile-container {
-  max-width: 800px;
+  max-width: 80%; 
   margin: 0 auto;
 }
 
@@ -100,4 +100,4 @@ body {
 
 .profile-card {
   margin-bottom: 24px;
-} 
+} 好吧

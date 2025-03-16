@@ -30,21 +30,25 @@ class Project(Base):
     # 关系
     owner = relationship("User", backref="projects")
     deployments = relationship("Deployment", back_populates="project", cascade="all, delete-orphan")
+    
+    # 关联的机器
+    machines = relationship("Machine", secondary="deployments", viewonly=True)
 
 
 class Deployment(Base):
-    """部署模型"""
+    """部署关联模型"""
     __tablename__ = "deployments"
     
     id = Column(Integer, primary_key=True, index=True)
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
+    machine_id = Column(Integer, ForeignKey("machines.id"), nullable=False)
     environment = Column(String, nullable=False, default="development")  # development, staging, production
-    server_host = Column(String, nullable=False)
-    server_port = Column(Integer, nullable=True)
-    deploy_path = Column(String, nullable=False)
-    status = Column(String, nullable=False, default="pending")  # pending, success, failed
+    deploy_path = Column(Text, nullable=True)
+    status = Column(String, nullable=False, default="not_deployed")  # not_deployed, pending, success, failed
     log = Column(Text, nullable=True)
-    deployed_at = Column(DateTime(timezone=True), server_default=func.now())
+    deployed_at = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     # 关系
-    project = relationship("Project", back_populates="deployments") 
+    project = relationship("Project", back_populates="deployments")
+    machine = relationship("Machine", backref="deployments") 

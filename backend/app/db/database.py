@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from app.core.config import settings
+from app.db.base_class import Base
 
 # 创建异步引擎
 engine = create_async_engine(
@@ -14,10 +14,6 @@ engine = create_async_engine(
 async_session_factory = async_sessionmaker(
     engine, expire_on_commit=False, autoflush=False, autocommit=False
 )
-
-# 创建基础模型类
-Base = declarative_base()
-
 
 # 获取数据库会话的异步上下文管理器
 async def get_db() -> AsyncSession:

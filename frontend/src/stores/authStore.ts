@@ -1,11 +1,14 @@
 import { create } from 'zustand'
-import axios from 'axios'
+import { loginApi } from '../utils/api'
+import api from '../utils/api'
+import { useNavigate } from 'react-router-dom'
 
 interface User {
   id: number
   username: string
   email: string
   is_admin: boolean
+  avatar_url?: string
 }
 
 interface AuthState {
@@ -19,8 +22,8 @@ interface AuthState {
   updateUser: (userData: User) => void
 }
 
-// API基础URL
-const API_URL = 'http://localhost:8011/api';
+// API基础URL - 使用相对路径，通过Vite代理转发
+const API_URL = '/api';
 
 export const useAuthStore = create<AuthState>((set) => ({
   token: localStorage.getItem('token'),
@@ -30,15 +33,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   login: async (username, password) => {
     set({ loading: true })
     try {
-      const formData = new FormData()
-      formData.append('username', username)
-      formData.append('password', password)
-      
-      const response = await axios.post(`${API_URL}/auth/login`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        }
-      })
+      const response = await loginApi(username, password)
       const { access_token } = response.data
       
       localStorage.setItem('token', access_token)
@@ -56,14 +51,10 @@ export const useAuthStore = create<AuthState>((set) => ({
   register: async (username, email, password) => {
     set({ loading: true })
     try {
-      await axios.post(`${API_URL}/auth/register`, {
+      await api.post(`/auth/register`, {
         username,
         email,
         password,
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-        }
       })
       set({ loading: false })
     } catch (error) {
@@ -86,12 +77,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
     
     try {
-      const response = await axios.get(`${API_URL}/auth/me`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      })
+      const response = await api.get(`/auth/me`)
       set({ user: response.data })
     } catch (error) {
       console.error('验证用户错误:', error)

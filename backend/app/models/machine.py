@@ -14,6 +14,7 @@ class Machine(Base):
     host = Column(String(255), nullable=False)
     port = Column(Integer, default=22, nullable=False)
     username = Column(String(50), nullable=False)
+    password = Column(String(255), nullable=True)  # 存储SSH密码
     key_file = Column(String(255), nullable=True)
     description = Column(Text, nullable=True)
     

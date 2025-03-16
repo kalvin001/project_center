@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 import os
 import sys
 import argparse
@@ -89,6 +86,7 @@ def list_machines():
         logger.info(f"  - {name}: {info['username']}@{info['host']}:{info['port']}")
 
 def get_ssh_client(machine_info, password=None):
+    print("get_ssh_client---",machine_info,password)
     """创建SSH客户端连接"""
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -445,4 +443,12 @@ def main():
         logger.error("未指定有效命令，请使用 -h 查看帮助")
 
 if __name__ == "__main__":
-    main() 
+    #main() 
+    machine_info = {
+        "host": "47.237.6.218",
+        "port": 22,
+        "username": "root", 
+    }
+
+    ret = get_ssh_client(machine_info,"kalvin@tb1")
+    print(ret)
