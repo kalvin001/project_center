@@ -15,7 +15,7 @@ def ensure_uv():
     """确保uv已安装且正常工作"""
     try:
         # 检查uv是否可用
-        subprocess.check_call([sys.executable, "-m", "uv", "--version"], 
+        subprocess.check_call(["uv", "--version"], 
                               stdout=subprocess.DEVNULL, 
                               stderr=subprocess.DEVNULL)
         return True

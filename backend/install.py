@@ -18,7 +18,7 @@ def main():
     
     # 检查是否安装了uv
     try:
-        subprocess.check_call([sys.executable, "-m", "uv", "--version"], 
+        subprocess.check_call(["uv", "--version"], 
                              stdout=subprocess.DEVNULL, 
                              stderr=subprocess.DEVNULL)
         print("✓ 检测到uv已安装")
