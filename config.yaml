@@ -10,7 +10,7 @@
   # 后端端口
   BACKEND_PORT: 8011
   # 后端启动命令
-  BACKEND_CMD: .venv\Scripts\python -m uvicorn app.main:app --host {host} --port {port}
+  BACKEND_CMD: .venv/bin/python -m uvicorn app.main:app --host {host} --port {port}
   # 后端窗口标题
   BACKEND_WINDOW: uvicorn_backend
 

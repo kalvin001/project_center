@@ -270,14 +270,18 @@ def check_backend_env():
     # 检查是否安装了uv
     logger.info("检查是否安装了uv...")
     try:
-        subprocess.check_call([sys.executable, "-m", "uv", "--version"], 
+        subprocess.check_call(["uv", "--version"], 
                               stdout=subprocess.DEVNULL, 
                               stderr=subprocess.DEVNULL)
         logger.info("uv已安装")
     except (subprocess.CalledProcessError, FileNotFoundError):
         logger.info("安装uv包管理器...")
         try:
-            subprocess.check_call([sys.executable, "-m", "pip", "install", "uv"])
+            # 在Linux上使用系统包管理器安装uv
+            if platform.system() == "Linux":
+                subprocess.check_call(["pipx", "install", "uv"])
+            else:
+                subprocess.check_call([sys.executable, "-m", "pip", "install", "uv"])
             logger.info("uv安装成功")
         except subprocess.CalledProcessError:
             logger.error("错误：安装uv失败，请手动安装")
@@ -288,12 +292,12 @@ def check_backend_env():
         logger.info("创建后端虚拟环境...")
         try:
             # 使用uv创建虚拟环境
-            subprocess.check_call([sys.executable, "-m", "uv", "venv", venv_dir])
+            subprocess.check_call(["uv", "venv", venv_dir])
             logger.info(f"虚拟环境已创建在: {venv_dir}")
             
             # 安装开发模式下的后端项目
             logger.info("安装后端项目(开发模式)...")
-            subprocess.check_call([venv_python, "-m", "uv", "pip", "install", "-e", "."])
+            subprocess.check_call(["uv", "pip", "install", "-e", "."], cwd=backend_dir)
             
             # 强制运行install_deps.py安装所有依赖
             logger.info("安装所有依赖...")
@@ -380,7 +384,7 @@ def check_backend_env():
                             logger.warning("继续执行，但部分功能可能不可用")
                     else:
                         logger.warning("未找到install_deps.py文件，尝试使用uv直接更新...")
-                        subprocess.check_call([venv_python, "-m", "uv", "pip", "install", "-e", "."])
+                        subprocess.check_call(["uv", "pip", "install", "-e", "."], cwd=backend_dir)
                 except subprocess.CalledProcessError as e:
                     logger.error(f"错误：更新依赖失败: {e}")
             else:
@@ -399,10 +403,10 @@ def check_backend_env():
                         shutil.rmtree(venv_dir)
                 
                 # 重新创建虚拟环境
-                subprocess.check_call([sys.executable, "-m", "uv", "venv", venv_dir])
+                subprocess.check_call(["uv", "venv", venv_dir])
                 
                 # 安装开发模式下的后端项目
-                subprocess.check_call([venv_python, "-m", "uv", "pip", "install", "-e", "."])
+                subprocess.check_call(["uv", "pip", "install", "-e", "."], cwd=backend_dir)
                 
                 # 强制运行install_deps.py安装所有依赖
                 install_deps_script = os.path.join(backend_dir, 'install_deps.py')
